@@ -6,32 +6,27 @@ import javax.imageio.ImageIO;
 
 public class archivos {
 
-    //leer la imagen
     public static BufferedImage cargarimagen(String ruta) {
         try {
-            File archivo = new File(ruta);
-            BufferedImage imagenOriginal = ImageIO.read(archivo);
-
-            //verificar si la imagen es valida
-            if (imagenOriginal == null) {
-                System.err.println("Error: El archivo no es una imagen valida: " + ruta);
+            BufferedImage original = ImageIO.read(new File(ruta));
+            if (original == null) {
+                System.out.println("No se pudo leer la imagen: " + ruta);
                 return null;
             }
-            //lienzo nuevo en blanco con las mismas dimensiones y formato estándar RGB (sin canal alfa)
-            //evita errores cuando imagenes o en escala de grises entran a ConvolveOp o RescaleOp
-            BufferedImage imagenEstandar = new BufferedImage(
-                    imagenOriginal.getWidth(),
-                    imagenOriginal.getHeight(),
+
+            //convertir a RGB
+            BufferedImage imagenRGB = new BufferedImage(
+                    original.getWidth(),
+                    original.getHeight(),
                     BufferedImage.TYPE_INT_RGB
             );
-            Graphics2D g2d = imagenEstandar.createGraphics();
-            //Copia la imagen original dentro del lienzo estándar
-            g2d.drawImage(imagenOriginal, 0, 0, null);
-            //Libera los recursos de memoria del pincel grafico
-            g2d.dispose();
-            return imagenEstandar;
+            Graphics2D g = imagenRGB.createGraphics();
+            g.drawImage(original, 0, 0, null);
+            g.dispose();
+
+            return imagenRGB;
         } catch (IOException e) {
-            System.err.println("Error al leer el archivo: " + e.getMessage());
+            System.out.println("Error al cargar: " + e.getMessage());
             return null;
         }
     }
@@ -43,24 +38,13 @@ public class archivos {
                 archivoSalida.getParentFile().mkdirs();
             }
 
-            //se pide guardar en JPG y la imagen tiene transparencia (ARGB), la pasamos a RGB
-            BufferedImage imagenFinal = imagen;
-            if (formato.equalsIgnoreCase("jpg") || formato.equalsIgnoreCase("jpeg")) {
-                if (imagen.getColorModel().hasAlpha()) {
-                    imagenFinal = new BufferedImage(imagen.getWidth(), imagen.getHeight(), BufferedImage.TYPE_INT_RGB);
-                    Graphics2D g = imagenFinal.createGraphics();
-                    g.drawImage(imagen, 0, 0, null);
-                    g.dispose();
-                }
-            }
-            boolean exito = ImageIO.write(imagenFinal, formato, archivoSalida);
-            if (exito) {
-                System.out.println("Imagen guardada exitosamente en: " + rutaSalida);
+            if (ImageIO.write(imagen, formato, archivoSalida)) {
+                System.out.println("Guardada en: " + rutaSalida);
             } else {
-                System.err.println("Error: Formato de imagen no soportado (" + formato + ")");
+                System.out.println("Formato no soportado: " + formato);
             }
         } catch (IOException e) {
-            System.err.println("Error al guardar la imagen: " + e.getMessage());
+            System.out.println("Error al guardar: " + e.getMessage());
         }
     }
 }
