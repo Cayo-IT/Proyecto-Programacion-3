@@ -1,101 +1,64 @@
-# Procesamiento de Imágenes en Java 
+# Procesamiento de Imágenes en Java
 
 **Proyecto — Programación III**
 
 ## Integrantes del Equipo
 
-* **César Osvaldo Díaz Martínez** — *225217170*
-
-* **Luis Ángel López Cruz** — *225216692*
-
-* **Carlos Omar Sánchez Torrescano** — *223220435*
+- **César Osvaldo Díaz Martínez** — *225217170*
+- **Luis Ángel López Cruz** — *225216692*
+- **Carlos Omar Sánchez Torrescano** — *223220435*
 
 ## Introducción
 
-Este proyecto se trata de las capacidades para la manipulación y el filtrado digital de imágenes en memoria sin depender de librerías externas.
+Este proyecto muestra cómo manipular y aplicar filtros digitales a imágenes utilizando únicamente las herramientas nativas de Java (`java.awt.image` y `javax.swing`), sin depender de librerías externas.
 
-El sistema utiliza objetos `BufferedImage` como representación matricial de píxeles e implementa la interfaz `BufferedImageOp` para aplicar transformaciones matemáticas de origen a destino (`filter(src, dst)`).
+El sistema trabaja con objetos `BufferedImage` para representar la imagen como una matriz de píxeles y utiliza la interfaz `BufferedImageOp` para transformar una imagen de origen en una nueva imagen procesada. Su arquitectura modular permite ajustar fácilmente los parámetros o combinar distintos filtros modificando unas cuantas líneas en el archivo principal.
 
-## ¿Qué hace el proyecto?
+## Estructura del Proyecto
 
-El programa carga una imagen base, estandariza su modelo de color a `TYPE_INT_RGB` para garantizar compatibilidad de canales y ejecuta un *pipeline* de cuatro operaciones fundamentales:
+El código está dividido en tres clases principales dentro de la carpeta `src/`:
+
+- **`archivos.java`**: Se encarga de leer cualquier imagen desde el disco duro, estandarizarla a formato RGB (`TYPE_INT_RGB`) para evitar problemas de compatibilidad con los filtros y guardar los resultados.
+- **`visuales.java`**: Contiene los métodos reutilizables que aplican las transformaciones matemáticas a los píxeles y la interfaz gráfica en Swing para comparar los resultados.
+- **`Main.java`**: Funciona como panel de control donde se define la imagen de entrada, se configuran los parámetros deseados para cada filtro y se mandan a guardar y mostrar las imágenes.
+
+## ¿Qué hace el programa?
+
+El programa carga una imagen base, convierte su modelo de color a RGB estándar y ejecuta un flujo configurable de operaciones que puedes moldear a tu gusto desde `Main.java`:
 
 1. **Ajuste de Brillo y Contraste (`RescaleOp`):**
-
-    * **Operación puntual** mediante la ecuación lineal $P_{nuevo} = (P_{original} \cdot \alpha) + \beta$.
-
-    * Permite estirar o comprimir el rango dinámico de los canales RGB y desplazar la luminosidad.
+    - Modifica cada píxel de manera individual mediante la ecuación lineal $P_{nuevo} = (P_{original} \cdot \alpha) + \beta$.
+    - Permite personalizar libremente el factor de contraste ($\alpha$) y el desplazamiento de brillo ($\beta$) para aclarar, oscurecer o resaltar los tonos de la imagen.
 
 2. **Transformaciones Geométricas (`AffineTransformOp`):**
-
-    * **Mapeo espacial** de coordenadas $(x, y) \rightarrow (x', y')$ mediante matrices de $3 \times 3$ encapsuladas en `AffineTransform`.
-
-    * Ejecuta rotaciones sobre el centro de la imagen utilizando interpolación bilineal (`TYPE_BILINEAR`) para suavizar bordes y evitar el efecto escalera.
+    - Permite rotar la imagen a cualquier ángulo (en grados) y modificar su escala (zoom) sobre su punto central.
+    - Permite elegir el tipo de interpolación (`TYPE_NEAREST_NEIGHBOR`, `TYPE_BILINEAR` o `TYPE_BICUBIC`) para controlar el equilibrio entre velocidad y suavizado de bordes.
 
 3. **Filtros de Convolución (`ConvolveOp`):**
-
-    * **Operación de vecindario** que desliza una matriz de pesos (`Kernel`) sobre cada píxel y sus vecinos:
-
-        * **Box Blur (**$3 \times 3$**):** Promedia la intensidad de los píxeles vecinos (suma de pesos $= 1.0$) para suavizar la imagen.
-
-        * **Detección de Bordes Laplaciano (**$3 \times 3$**):** Resalta cambios bruscos de intensidad y anula zonas planas (suma de pesos $= 0.0$).
+    - Desliza una matriz de pesos (`Kernel`) personalizable sobre cada píxel y sus vecinos para calcular un nuevo valor:
+        - **Desenfoque:** Promedia el color de cada píxel con sus vecinos; puedes ajustar el tamaño de la matriz para controlar qué tan borrosa sale la imagen.
+        - **Detección de Bordes:** Utiliza matrices de contraste (como el filtro con peso central positivo y vecinos negativos) que apagan las zonas de color sólido y resaltan únicamente los contornos. Puedes modificar los valores del arreglo para probar otros efectos como enfoque (*sharpen*) o relieve (*emboss*).
 
 4. **Interfaz Visual Comparativa y Exportación:**
+    - Abre una ventana (`JFrame`) en cuadrícula donde puedes mostrar tantas variaciones como agregues al arreglo de galería.
+    - Exporta automáticamente cada imagen resultante a la ruta y formato (`jpg`, `png`, etc.) que especifiques en `archivos.guardarimagen(...)`.
 
-    * Muestra la imagen original junto con los resultados procesados en una galería comparativa (`JFrame`).
+## Material Visual
 
-    * Exporta automáticamente cada imagen resultante a la carpeta `salida/`.
+La presentación utilizada durante la exposición está disponible para consulta en línea:
 
-## Material Visual 
-
-El material de apoyo utilizado durante la exposición está disponible para su consulta y descarga directa en este repositorio:
-
-* [**Descargar Presentación del Proyecto (PDF/PPTX)**](./nohayaunxd.pdf) *
+- [**Ver Presentación del Proyecto (Google Slides)**](https://docs.google.com/presentation/d/1IXlm8YQ7z_bMOs_pcW26j8Ck7RE2lPVxH-gQQyBHfvc/edit?usp=sharing)
 
 ## Cómo descargarlo y ejecutarlo
 
 ### Requisitos previos
 
-* **Java Development Kit (JDK):** Versión 26 o una estable.
+- **Java Development Kit (JDK):** Versión 17 o superior.
+- **Entorno de desarrollo:** IntelliJ IDEA, Visual Studio Code, Eclipse, NetBeans o terminal del sistema.
 
-* **Entorno de desarrollo:** Visual Studio Code, IntelliJ IDEA, Eclipse, NetBeans o terminal del sistema.
-
-### 1. Descarga del código
+### Descarga del código
 
 Clona el repositorio desde una terminal:
 
-```
-git clone https://github.com/Cayo-IT/Proyecto-Programacion-3.git
-
-```
-
-*(También puedes hacer clic en el botón verde **Code** en la parte superior de esta página y seleccionar **Download ZIP**).*
-
-### 2. Preparación de la imagen de prueba
-
-Asegúrate de que la imagen de prueba (en formato `.jpg` o `.png`) se encuentre en la **carpeta raíz** del proyecto (al mismo nivel que la carpeta `src`) y que su nombre coincida con la variable `rutaEntrada` definida en `Main.java`.
-
-### 3. Ejecución según tu entorno
-
-* **Visual Studio Code (VS Code):**
-
-    1. Instala el paquete de extensiones **Extension Pack for Java** de Microsoft.
-
-    2. Abre la carpeta del proyecto (`File > Open Folder`).
-
-    3. Abre el archivo `src/Main.java` y haz clic en el botón **Run** que aparece encima del método `main` (o presiona `F5`).
-
-* **IntelliJ IDEA / Eclipse / NetBeans:**
-
-    1. Abre o importa la carpeta del proyecto desde el menú del IDE.
-
-    2. Ubica el archivo `src/Main.java`, haz clic derecho sobre él y selecciona **Run 'Main.main()'**.
-
-* **Desde la terminal (sin IDE):**
-  Sitúate en la carpeta raíz del proyecto y ejecuta los siguientes comandos:
-
-  ```
-  javac -d out src/*.java
-  java -cp out Main
-  
-  ```
+```bash
+git clone [https://github.com/Cayo-IT/Proyecto-Programacion-3.git](https://github.com/Cayo-IT/Proyecto-Programacion-3.git)
